@@ -5,6 +5,7 @@
     overflow: hidden;
     display: flex;
 }
+/*background: url(./Images/Background.jpg) no-repeat center; */
 
 .background{
     position: absolute;
@@ -12,7 +13,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url(./Images/Background.jpg) no-repeat center;
+    background: black;
     background-size: cover;
     filter: grayscale(100);
     z-index: -1;

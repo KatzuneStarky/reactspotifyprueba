@@ -22,12 +22,24 @@ function MusicPlayer({ song, imgSrc }) {
 
     const audioPlayer = useRef();
     const progressBar = useRef();
-    const animationRef = useRef()
+    const animationRef = useRef();
 
     useEffect(() => {
         const seconds = Math.floor(audioPlayer.current.duration);
         setDuration(seconds);
     }, [audioPlayer?.current?.loadedmetadata, audioPlayer?.current?.readyState]);
+
+    const changePlayPause = () => {
+        const prevValue = isPlaying;
+        if (!prevValue) {
+            audioPlayer.current.play();
+            animationRef.current = requestAnimationFrame(whilePlaying);
+        } else {
+            audioPlayer.current.pause();
+            cancelAnimationFrame(animationRef.current);
+        }
+        setIsPlaying(!prevValue);
+    };
 
     const CalculateTime = (sec) => {
         const minutes = Math.floor(sec / 60);
@@ -39,28 +51,29 @@ function MusicPlayer({ song, imgSrc }) {
         return `${returnMin}:${returnSec}`;
     };
 
+    const whilePlaying = () => {
+        progressBar.current.value = audioPlayer.current.currentTime;
+        changeCurrentTime();
+        animationRef.current = requestAnimationFrame(whilePlaying);
+    };
+
+    const changeProgres = () => {
+        audioPlayer.current.currentTime = progressBar.current.value;
+        changeCurrentTime();
+    };
+
+    const changeCurrentTime = () => {
+        progressBar.current.style.setProperty(
+            "--player-played",
+            `${(progressBar.current.value / duration) * 100}%`
+        );
+        setCurrentTime(progressBar.current.value);
+    };
+
     const changeLoved = () => {
         setIsLove(!isLove);
     };
 
-    const changePlayPause = () => {
-        const prevValue = isPlaying;
-        if (!prevValue) {
-            audioPlayer.current.play();
-        } else {
-            audioPlayer.current.pause();
-        }
-        setIsPlaying(!prevValue);
-    };
-
-    const changeProgres = () => {
-        audioPlayer.current.currentTime = progressBar.current.value
-        progressBar.current.style.setProperty('--player-played', `${(progressBar.current.value / duration) *100}%`)
-        setCurrentTime(progressBar.current.value)
-    }
-
-    const whilePlaying = () => {        
-    }
     return (
         <div className="musicPlayer">
             <div className="songImage">
@@ -124,11 +137,16 @@ function MusicPlayer({ song, imgSrc }) {
                 </div>
                 <div className="bottom">
                     <div className="currentTime">{CalculateTime(currentTime)}</div>
-                    <input type="range" className="progressBar" onChange={changeProgres} />
+                    <input
+                        type="range"
+                        className="progressBar"
+                        onChange={changeProgres}
+                        ref={progressBar}
+                    />
                     <div className="duration">
-                        {(duration && !isNaN(duration) && CalculateTime(duration)) ?
-                            CalculateTime(duration) : "00:00"
-                        }
+                        {duration && !isNaN(duration) && CalculateTime(duration)
+                            ? CalculateTime(duration)
+                            : "00:00"}
                     </div>
                 </div>
             </div>
